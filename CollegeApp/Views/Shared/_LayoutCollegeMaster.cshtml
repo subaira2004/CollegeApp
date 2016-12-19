@@ -1,0 +1,271 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <base href="/Master/">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - College App</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body style="min-height: 100vh;height: auto;">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @Html.ActionLink("Application name", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                    <li>@Html.ActionLink("About", "About", "Home")</li>
+                    <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+                    <li>@Html.ActionLink("Master", "Index", "Master")</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container body-content" ng-app="myApp">
+        <div class="col-xs-3" ng-init="selectedTab = 'Dept'">
+            <!-- required for floating -->
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs tabs-left nav-stacked">
+                <li ng-class="{'active':selectedTab === 'Dept'}" ng-click="selectedTab = 'Dept'"><a href="Department">Department</a></li>
+                <li ng-class="{'active':selectedTab === 'Sect'}" ng-click="selectedTab = 'Sect'"><a href="Section">Section</a></li>
+                <li ng-class="{'active':selectedTab === 'Stud'}" ng-click="selectedTab = 'Stud'"><a href="Student">Student</a></li>
+                <li ng-class="{'active':selectedTab === 'Lect'}" ng-click="selectedTab = 'Lect'"><a href="Lecturer">Lecturer</a></li>
+            </ul>
+        </div>
+        <div class="col-xs-9">
+           
+            <div class="row" ng-view>
+                @RenderBody()
+            </div>
+
+        </div>
+    </div>
+    <footer class="footer">
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;&copy; @DateTime.Now.Year - College App</p>
+    </footer>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/angularjs")
+    @RenderSection("scripts", required: false)
+    <script>
+        var myApp = angular.module('myApp', ["ngRoute"]).config(function ($routeProvider, $httpProvider, $locationProvider) {
+
+            $locationProvider.hashPrefix('!').html5Mode(true);
+
+            $routeProvider.when('/', {
+                templateUrl: '/CollegeAppMaster/Department',
+                controller: 'DepartmentController'
+            }).when('/Department', {
+                templateUrl: '/CollegeAppMaster/Department',
+                controller: 'DepartmentController'
+            }).when('/Section', {
+                templateUrl: '/CollegeAppMaster/Section',
+                controller: 'SectionController'
+            }).when('/Student', {
+                templateUrl: '/CollegeAppMaster/Student',
+                controller: 'StudentController'
+            }).otherwise({
+                redirectTo: '/Department'
+            });
+
+            // $httpProvider.interceptors.push('AuthHttpResponseInterceptor');
+        });
+
+
+        //myapp.Service('CollegeMaster', function () {
+
+        //});
+
+        //Department Controller
+        myApp.controller("DepartmentController", ["$http", "$scope", "$routeParams", function ($http, $scope, $routeParams) {
+            $scope.dataLoaded = false;
+            $scope.search = '';
+            $scope.departments = [];
+            $scope.department = {};
+
+
+            $scope.submit = function () {
+                $scope.dataLoaded = false;
+                $http({
+                    method: 'POST',
+                    url: '/CollegeAppMaster/Department',
+                    data: $scope.department
+                }).then(function successCallback(response) {
+                    // this callback will be called asynchronously
+                    // when the response is available
+                    $scope.departments = response.data;
+                    $scope.department = {};
+                    $scope.dataLoaded = true;
+                }, function errorCallback(response) {
+                    // called asynchronously if an error occurs
+                    // or server returns response with an error status.
+                    alert(response.data.Error);
+                    $scope.dataLoaded = true;
+                });
+
+                //$scope.department ={};// { 'Name': '', 'DepartmentId' : '' };
+            };
+
+            $http({
+                method: 'GET',
+                url: '/CollegeAppMaster/AllDepartments'
+            }).then(function successCallback(response) {
+                // this callback will be called asynchronously
+                // when the response is available
+                $scope.departments = response.data;
+                $scope.dataLoaded = true;
+            }, function errorCallback(response) {
+                alert(response.data.Error);
+                $scope.dataLoaded = true;
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+            });
+
+            $scope.EditDepartment = function (DepartmentId) {
+                $scope.dataLoaded = false;
+                $http({
+                    method: 'GET',
+                    url: '/CollegeAppMaster/EditDepartments?DepartmentId=' + DepartmentId
+                }).then(function successCallback(response) {
+                    // this callback will be called asynchronously
+                    // when the response is available
+                    $scope.department = response.data;
+                    $scope.dataLoaded = true;
+                }, function errorCallback(response) {
+                    alert(response.data.Error);
+                    $scope.dataLoaded = true;
+                    // called asynchronously if an error occurs
+                    // or server returns response with an error status.
+                });
+            };
+            $scope.DeleteDepartment = function (DepartmentId) {
+                if (confirm('Are you want to Delete?')) {
+                    $scope.dataLoaded = false;
+                    $http({
+                        method: 'GET',
+                        url: '/CollegeAppMaster/DeleteDepartments?DepartmentId=' + DepartmentId
+                    }).then(function successCallback(response) {
+                        // this callback will be called asynchronously
+                        // when the response is available
+                        $scope.departments = response.data;
+                        $scope.dataLoaded = true;
+                    }, function errorCallback(response) {
+                        alert(response.data.Error);
+                        $scope.dataLoaded = true;
+                        // called asynchronously if an error occurs
+                        // or server returns response with an error status.
+                    });
+                }
+            };
+
+        }]);
+
+        //section Controller
+        myApp.controller("SectionController", ["$http", "$scope", "$routeParams", function ($http, $scope, $routeParams) {
+            $scope.dataLoaded = false;
+            $scope.search = '';
+            $scope.sections = [];
+            $scope.section = {};
+            $scope.selectedDepartment = {};
+            $scope.departments = [];
+
+            //To save / Update Section
+            $scope.submitSection = function () {
+                $scope.dataLoaded = false;
+                $scope.section.DepartmentId = $scope.selectedDepartment.DepartmentId;
+                $scope.section.DepartmentName = $scope.selectedDepartment.Name;
+                $http({
+                    method: 'POST',
+                    url: '/CollegeAppMaster/Section',
+                    data: $scope.section
+                }).then(function successCallback(response) {
+                    // this callback will be called asynchronously
+                    // when the response is available
+                    $scope.sections = response.data;
+                    $scope.section = {};
+                    $scope.selectedDepartment = {};
+                    $scope.dataLoaded = true;
+                }, function errorCallback(response) {
+                    // called asynchronously if an error occurs
+                    // or server returns response with an error status.
+                    alert(response.data.Error);
+                    $scope.dataLoaded = true;
+                });
+            };
+
+            //to load the Sections in the Grid
+            $http({
+                method: 'GET',
+                url: '/CollegeAppMaster/AllSections'
+            }).then(function successCallback(response) {
+                // this callback will be called asynchronously
+                // when the response is available
+                $scope.sections = response.data;
+                $scope.dataLoaded = true;
+            }, function errorCallback(response) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+                alert(response.data.Error);
+                $scope.dataLoaded = true;
+            });
+
+            //To Load the Department List in the Dropdown of the form
+            $http({
+                method: 'GET',
+                url: '/CollegeAppMaster/AllDepartments'
+            }).then(function successCallback(response) {
+                // this callback will be called asynchronously
+                // when the response is available
+                $scope.departments = response.data;
+                $scope.dataLoaded = true;
+            }, function errorCallback(response) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+                alert(response.data.Error);
+                $scope.dataLoaded = true;
+            });
+
+        }]);
+
+
+        //Student Controller
+        myApp.controller("StudentController", ["$http", "$scope", "$routeParams", function ($http, $scope, $routeParams) {
+            $scope.dataLoaded = false;
+            $scope.search = '';
+            $scope.students = [];
+            $scope.student = {};
+            $scope.sections = [];
+            $scope.departments = [];
+            $scope.selectedDepartment = {};
+            $scope.selecteSection = {};
+
+            $http({
+                method: 'GET',
+                url: '/CollegeAppMaster/AllStudents'
+            }).then(function successCallback(response) {
+                // this callback will be called asynchronously
+                // when the response is available
+                $scope.students = response.data;
+                $scope.dataLoaded = true;
+            }, function errorCallback(response) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+                alert(response.data.Error);
+                $scope.dataLoaded = true;
+            });
+
+        }]);
+
+    </script>
+</body>
+</html>

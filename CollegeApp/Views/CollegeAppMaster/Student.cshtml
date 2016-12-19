@@ -1,0 +1,45 @@
+﻿<div class="loaderFrame" ng-hide="dataLoaded">
+    <p class="loader"></p>
+</div>
+<div ng-controller="StudentController as StudentCtrl" class="row">
+    <h2>Student</h2>
+    <div class="col-lg-12">
+        <input class="form-control" type="text" placeholder="Search" ng-model="search" />
+    </div>
+    <div class="col-lg-12">
+        <table class="table table-bordered" style="width:100%">
+            <thead>
+                <tr>
+                    <th>
+                        Sr.No
+                    </th>
+                    <th>
+                        Student Name
+                    </th>
+                    <th>
+                        Department
+                    </th>
+                    <th>
+                        Section
+                    </th>
+                    <th>
+                        Join Date
+                    </th>
+                    <th>
+                        Graduation Date
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="student in students | filter:search">
+                    <td>{{$index + 1}}</td>
+                    <td>{{student.StudentName}}</td>
+                    <td>{{student.DepartmentName}}</td>
+                    <td>{{student.SectionName}}</td>
+                    <td><span ng-hide="{{student.DateOfJoin==='/Date(-62135596800000)/'}}">{{student.DateOfJoin.replace("/Date(", "").replace(")/","") | date : "dd-MMM-yyyy"}}</span><span ng-show="{{student.DateOfJoin==='/Date(-62135596800000)/'}}">--</span></td>
+                    <td><span ng-hide="{{student.DateofGraduaton==='/Date(-62135596800000)/'}}">{{student.DateofGraduaton.replace("/Date(", "").replace(")/","") | date : "dd-MMM-yyyy"}}</span><span ng-show="{{student.DateofGraduaton==='/Date(-62135596800000)/'}}">--</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
