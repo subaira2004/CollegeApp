@@ -36,6 +36,7 @@
                     <th>
                         Department Name
                     </th>
+                    <th>Edit/Delete</th>
                 </tr>
             </thead>
             <tbody>
@@ -43,6 +44,10 @@
                     <td>{{$index + 1}}</td>
                     <td>{{section.SectionName}}</td>
                     <td>{{section.DepartmentName}}</td>
+                    <td>
+                        <a href="#" ng-click="EditSection(section.SectionId)">Edit</a>
+                        <a href="#" ng-click="DeleteSection(section.SectionId)">Delete</a>
+                    </td>
                 </tr>
             </tbody>
         </table>

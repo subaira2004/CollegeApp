@@ -55,7 +55,8 @@ namespace CollegeApp.Controllers
         public JsonResult DeleteDepartments(int DepartmentId)
         {
             var SectionsOfThisDept = context.DeptSections.Where(p => p.DepartmentId == DepartmentId).ToList();
-            if (SectionsOfThisDept.Count > 0)
+            var lecturerOfThisDept = context.Lecturers.Where(p => p.DepartmentId == DepartmentId).ToList();
+            if ((SectionsOfThisDept.Count > 0) || (lecturerOfThisDept.Count > 0))
             {
                 Response.StatusCode = (int)HttpStatusCode.BadRequest;
 
@@ -82,8 +83,13 @@ namespace CollegeApp.Controllers
         {
             if (ModelState.IsValid)
             {
+                DeptSection deptSectSave = new DeptSection { DeptSectionId = DeptSect.SectionId, Name = DeptSect.SectionName, DepartmentId = DeptSect.DepartmentId };
+                if (DeptSect.SectionId > 0) //Edit updating
+                    context.Entry(deptSectSave).State = System.Data.Entity.EntityState.Modified;
+                    //context.DeptSections.Add(new DeptSection { DeptSectionId = DeptSect.SectionId, Name = DeptSect.SectionName, DepartmentId = DeptSect.DepartmentId });
+                else
+                    context.DeptSections.Add(deptSectSave);
 
-                context.DeptSections.Add(new DeptSection { DeptSectionId = DeptSect.SectionId, Name = DeptSect.SectionName, DepartmentId = DeptSect.DepartmentId });
                 context.SaveChanges();
             }
             return AllSections();
@@ -110,6 +116,42 @@ namespace CollegeApp.Controllers
         {
             return Json(context.DeptSections.Where(p => p.DepartmentId == DepartmentId).ToList(), JsonRequestBehavior.AllowGet);
         }
+
+        [HttpGet]
+        public JsonResult EditSection(int SectionId)
+        {
+            var editSection = (from p in context.DeptSections
+                               join q in context.Departments on p.DepartmentId equals q.DepartmentId
+                               where p.DeptSectionId == SectionId
+                               select new DeptSectionViewModel
+                               {
+                                   SectionId = p.DeptSectionId,
+                                   SectionName = p.Name,
+                                   DepartmentId = p.DepartmentId,
+                                   DepartmentName = q.Name
+                               }).First();
+            return Json(editSection, JsonRequestBehavior.AllowGet);
+        }
+
+
+        [HttpGet]
+        public JsonResult DeleteSection(int SectionId)
+        {
+            var studentOfThisSection = context.Students.Where(p => p.DeptSectionId == SectionId).ToList();
+            if (studentOfThisSection.Count > 0)
+            {
+                Response.StatusCode = (int)HttpStatusCode.BadRequest;
+
+                return Json(new ErrorMsgViewModel() { Error = "This Section Cannot be deleted as it is associated with some Student" }, JsonRequestBehavior.AllowGet);
+            }
+            {
+                var DelSection = context.DeptSections.Where(p => p.DeptSectionId == SectionId).AsEnumerable();
+                context.DeptSections.RemoveRange(DelSection);
+                context.SaveChanges();
+
+                return AllSections();
+            }
+        }
         #endregion
 
         #region "Student"
@@ -128,7 +170,7 @@ namespace CollegeApp.Controllers
                     StudentId = studentVM.StudentId,
                     Name = studentVM.StudentName,
                     DeptSectionId = studentVM.DeptSectionId,
-                    DateofGraduaton = (studentVM.DateofGraduaton == null ||(DateTime)studentVM.DateofGraduaton == DateTime.MinValue) ? null : studentVM.DateofGraduaton,
+                    DateofGraduaton = (studentVM.DateofGraduaton == null || (DateTime)studentVM.DateofGraduaton == DateTime.MinValue) ? null : studentVM.DateofGraduaton,
                     DateOfJoin = (studentVM.DateOfJoin == null || (DateTime)studentVM.DateOfJoin == DateTime.MinValue) ? null : studentVM.DateOfJoin
                 });
                 context.SaveChanges();
