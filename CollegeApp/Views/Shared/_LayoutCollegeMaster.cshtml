@@ -58,6 +58,7 @@
     @Scripts.Render("~/bundles/bootstrap")
     @Scripts.Render("~/bundles/angularjs")
     @RenderSection("scripts", required: false)
+
     <script>
         var myApp = angular.module('myApp', ["ngRoute","angularjs-datetime-picker"]).config(function ($routeProvider, $httpProvider, $locationProvider) {
 
@@ -75,6 +76,9 @@
             }).when('/Student', {
                 templateUrl: '/CollegeAppMaster/Student',
                 controller: 'StudentController'
+            }).when('/Lecturer', {
+                templateUrl: '/CollegeAppMaster/Lecturer',
+                controller: 'LecturerController'
             }).otherwise({
                 redirectTo: '/Department'
             });
@@ -236,6 +240,7 @@
                 $scope.dataLoaded = true;
             });
 
+            //to edit/update Lecturer
             $scope.EditSection = function(SectionId)
             {
                 $scope.dataLoaded = false;
@@ -377,6 +382,118 @@
 
         }]);
 
+
+        //Lecturer Controller
+        myApp.controller("LecturerController", ["$http", "$scope", "$routeParams", function ($http, $scope, $routeParams) {
+            $scope.dataLoaded = false;
+            $scope.search = '';
+            $scope.lecturers = [];
+            $scope.lecturer = {};
+            $scope.selectedDepartment = {};
+            $scope.departments = [];
+
+            //To save / Update Lecturer
+            $scope.submit = function () {
+                $scope.dataLoaded = false;
+                $scope.lecturer.DepartmentId = $scope.selectedDepartment.DepartmentId;
+                $scope.lecturer.DepartmentName = $scope.selectedDepartment.Name;
+                $http({
+                    method: 'POST',
+                    url: '/CollegeAppMaster/Lecturer',
+                    data: $scope.lecturer
+                }).then(function successCallback(response) {
+                    // this callback will be called asynchronously
+                    // when the response is available
+                    $scope.lecturers = response.data;
+                    $scope.lecturer = {};
+                    $scope.selectedDepartment = {};
+                    $scope.dataLoaded = true;
+                }, function errorCallback(response) {
+                    // called asynchronously if an error occurs
+                    // or server returns response with an error status.
+                    alert(response.data.Error);
+                    $scope.dataLoaded = true;
+                });
+            };
+
+            //to load the Lecturers in the Grid
+            $http({
+                method: 'GET',
+                url: '/CollegeAppMaster/AllLecturers'
+            }).then(function successCallback(response) {
+                // this callback will be called asynchronously
+                // when the response is available
+                $scope.lecturers = response.data;
+                $scope.dataLoaded = true;
+            }, function errorCallback(response) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+                alert(response.data.Error);
+                $scope.dataLoaded = true;
+            });
+
+            //To Load the Department List in the Dropdown of the form
+            $http({
+                method: 'GET',
+                url: '/CollegeAppMaster/AllDepartments'
+            }).then(function successCallback(response) {
+                // this callback will be called asynchronously
+                // when the response is available
+                $scope.departments = response.data;
+                $scope.dataLoaded = true;
+            }, function errorCallback(response) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+                alert(response.data.Error);
+                $scope.dataLoaded = true;
+            });
+
+            //to edit/update Lecturer
+            $scope.EditLecturer = function (LecturerId) {
+                $scope.dataLoaded = false;
+                $scope.lecturer = {};
+                $scope.selectedDepartment = {};
+                $http({
+                    method: 'GET',
+                    url: '/CollegeAppMaster/EditLecturer?LecturerId=' + LecturerId
+                }).then(function successCallback(response) {
+                    // this callback will be called asynchronously
+                    // when the response is available
+                    $scope.lecturer = response.data;
+                    $scope.selectedDepartment.DepartmentId = response.data.DepartmentId;
+                    $scope.selectedDepartment.Name = response.data.DepartmentName;
+                    $scope.dataLoaded = true;
+                }, function errorCallback(response) {
+                    // called asynchronously if an error occurs
+                    // or server returns response with an error status.
+                    alert(response.data.Error);
+                    $scope.dataLoaded = true;
+                });
+            }
+
+            //To delete the lecturer
+            $scope.DeleteLecturer = function (LecturerId) {
+                if (confirm('Are you sure want delete this Lecturer?')) {
+                    $scope.dataLoaded = false;
+                    $http({
+                        method: 'GET',
+                        url: '/CollegeAppMaster/DeleteLecturer?LecturerId=' + LecturerId
+                    }).then(function successCallback(response) {
+                        // this callback will be called asynchronously
+                        // when the response is available
+                        $scope.lecturers = response.data;
+                        $scope.dataLoaded = true;
+                    }, function errorCallback(response) {
+                        // called asynchronously if an error occurs
+                        // or server returns response with an error status.
+                        alert(response.data.Error);
+                        $scope.dataLoaded = true;
+                    });
+                }
+            }
+
+        }]);
     </script>
+
 </body>
 </html>
