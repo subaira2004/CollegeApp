@@ -83,7 +83,7 @@ namespace CollegeApp.Controllers
             if (ModelState.IsValid)
             {
 
-                context.DeptSections.Add(new DeptSection { Name = DeptSect.SectionName, DepartmentId = DeptSect.DepartmentId });
+                context.DeptSections.Add(new DeptSection { DeptSectionId = DeptSect.SectionId, Name = DeptSect.SectionName, DepartmentId = DeptSect.DepartmentId });
                 context.SaveChanges();
             }
             return AllSections();
@@ -105,6 +105,11 @@ namespace CollegeApp.Controllers
             return Json(Sections.ToList(), JsonRequestBehavior.AllowGet);
         }
 
+        [HttpGet]
+        public JsonResult GetDeptSectionByDeptId(int DepartmentId)
+        {
+            return Json(context.DeptSections.Where(p => p.DepartmentId == DepartmentId).ToList(), JsonRequestBehavior.AllowGet);
+        }
         #endregion
 
         #region "Student"
@@ -113,14 +118,41 @@ namespace CollegeApp.Controllers
             return PartialView();
         }
 
+        [HttpPost]
+        public JsonResult Student(StudentViewModel studentVM)
+        {
+            if (ModelState.IsValid)
+            {
+                context.Students.Add(new Student
+                {
+                    StudentId = studentVM.StudentId,
+                    Name = studentVM.StudentName,
+                    DeptSectionId = studentVM.DeptSectionId,
+                    DateofGraduaton = (studentVM.DateofGraduaton == null ||(DateTime)studentVM.DateofGraduaton == DateTime.MinValue) ? null : studentVM.DateofGraduaton,
+                    DateOfJoin = (studentVM.DateOfJoin == null || (DateTime)studentVM.DateOfJoin == DateTime.MinValue) ? null : studentVM.DateOfJoin
+                });
+                context.SaveChanges();
+            }
+            return AllStudents();
+        }
+
         [HttpGet]
         public JsonResult AllStudents()
         {
-            var Students = new List<StudentViewModel>
-            {
-                new StudentViewModel() { StudentId =1, StudentName="Hi",DepartmentId=1,DepartmentName="CSE",DeptSectionId=1,SectionName="A Sect" },
-                new StudentViewModel() { StudentId =1, StudentName="Hello",DepartmentId=1,DepartmentName="CSE",DeptSectionId=1,SectionName="B Sect",DateOfJoin=DateTime.Now }
-            };
+            var Students = (from p in context.Students
+                            join q in context.DeptSections on p.DeptSectionId equals q.DeptSectionId
+                            join r in context.Departments on q.DepartmentId equals r.DepartmentId
+                            select new StudentViewModel
+                            {
+                                StudentId = p.StudentId,
+                                StudentName = p.Name,
+                                DepartmentId = q.DepartmentId,
+                                DepartmentName = r.Name,
+                                DeptSectionId = p.DeptSectionId,
+                                SectionName = q.Name,
+                                DateofGraduaton = p.DateofGraduaton,
+                                DateOfJoin = p.DateOfJoin
+                            }).ToList();
             return Json(Students, JsonRequestBehavior.AllowGet);
         }
 

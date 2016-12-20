@@ -4,6 +4,36 @@
 <div ng-controller="StudentController as StudentCtrl" class="row">
     <h2>Student</h2>
     <div class="col-lg-12">
+        <form ng-submit="submit()">
+            <div class="form-group">
+                <label for="studentName">Student Name:</label>
+                <input class="form-control" id="studentName" type="text" ng-model="student.StudentName" name="text" />
+            </div>
+            <div class="form-group">
+                <label for="department">Department:</label>
+                <select class="dropdown form-control" ng-model="selectedDepartment"
+                        ng-options="department.Name for department in departments track by department.DepartmentId" ng-change="getDeptSection()" placeholder="select"></select>
+
+            </div>
+            <div class="form-group">
+                <label for="section">section:</label>
+                <select class="dropdown form-control" ng-model="selectedSection"
+                        ng-options="section.Name for section in sections track by section.DeptSectionId" placeholder="select"></select>
+
+            </div>
+            <div class="form-group">
+                <label for="joiningDate">Date of Join:</label>
+                <input  type="text"  class="form-control" id="joiningDate" ng-model="student.DateOfJoin" datetime-picker date-format="dd-MMM-yyyy" date-only  readonly/>
+              </div>
+            <div class="form-group">
+                <label for="graduationDate">Date Of Graduation:</label>
+                <input type="text" class="form-control" id="graduationDate" ng-model="student.DateofGraduaton" datetime-picker date-format="dd-MMM-yyyy" date-only readonly />
+            </div>
+            <input type="submit" id="submit" value="Submit" class="btn btn-default" />
+        </form>
+        <br />
+    </div>
+    <div class="col-lg-12">
         <input class="form-control" type="text" placeholder="Search" ng-model="search" />
     </div>
     <div class="col-lg-12">
