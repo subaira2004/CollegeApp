@@ -154,6 +154,7 @@
     <Compile Include="Models\DeptSectionViewModel.cs" />
     <Compile Include="Models\ErrorMsgViewModel.cs" />
     <Compile Include="Models\Lecturer.cs" />
+    <Compile Include="Models\LecturerViewModel.cs" />
     <Compile Include="Models\Student.cs" />
     <Compile Include="Models\StudentViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -976,6 +977,7 @@
     <Content Include="Views\CollegeAppMaster\Department.cshtml" />
     <Content Include="Views\CollegeAppMaster\Section.cshtml" />
     <Content Include="Views\CollegeAppMaster\Student.cshtml" />
+    <Content Include="Views\CollegeAppMaster\Lecturer.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

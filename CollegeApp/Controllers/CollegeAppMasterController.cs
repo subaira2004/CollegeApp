@@ -86,7 +86,6 @@ namespace CollegeApp.Controllers
                 DeptSection deptSectSave = new DeptSection { DeptSectionId = DeptSect.SectionId, Name = DeptSect.SectionName, DepartmentId = DeptSect.DepartmentId };
                 if (DeptSect.SectionId > 0) //Edit updating
                     context.Entry(deptSectSave).State = System.Data.Entity.EntityState.Modified;
-                    //context.DeptSections.Add(new DeptSection { DeptSectionId = DeptSect.SectionId, Name = DeptSect.SectionName, DepartmentId = DeptSect.DepartmentId });
                 else
                     context.DeptSections.Add(deptSectSave);
 
@@ -196,6 +195,75 @@ namespace CollegeApp.Controllers
                                 DateOfJoin = p.DateOfJoin
                             }).ToList();
             return Json(Students, JsonRequestBehavior.AllowGet);
+        }
+
+        #endregion
+
+        #region "Leturer"
+
+        public ActionResult Lecturer()
+        {
+            return PartialView();
+        }
+
+        [HttpPost]
+        public JsonResult Lecturer(LecturerViewModel lecturerVM)
+        {
+            if (ModelState.IsValid)
+            {
+                Lecturer lecturerSave = new Lecturer { LecturerId = lecturerVM.LecturerId, Name = lecturerVM.LecturerName, DepartmentId = lecturerVM.DepartmentId };
+                if (lecturerVM.LecturerId > 0) //Edit updating
+                    context.Entry(lecturerSave).State = System.Data.Entity.EntityState.Modified;
+                else
+                    context.Lecturers.Add(lecturerSave);
+
+                context.SaveChanges();
+            }
+            return AllLecturers();
+        }
+
+        [HttpGet]
+        public JsonResult AllLecturers()
+        {
+            var Lecturers = from p in context.Lecturers
+                            join q in context.Departments on p.DepartmentId equals q.DepartmentId
+                            select new LecturerViewModel
+                            {
+                                LecturerId = p.LecturerId,
+                                LecturerName = p.Name,
+                                DepartmentId = p.DepartmentId,
+                                DepartmentName = q.Name
+                            };
+
+            return Json(Lecturers.ToList(), JsonRequestBehavior.AllowGet);
+        }
+
+
+        [HttpGet]
+        public JsonResult EditLecturer(int LecturerId)
+        {
+            var editLecturer = (from p in context.Lecturers
+                                join q in context.Departments on p.DepartmentId equals q.DepartmentId
+                                where p.LecturerId == LecturerId
+                                select new LecturerViewModel
+                                {
+                                    LecturerId = p.LecturerId,
+                                    LecturerName = p.Name,
+                                    DepartmentId = p.DepartmentId,
+                                    DepartmentName = q.Name
+                                }).First();
+            return Json(editLecturer, JsonRequestBehavior.AllowGet);
+        }
+
+
+        [HttpGet]
+        public JsonResult DeleteLecturer(int LecturerId)
+        {
+            var DelLecturer = context.Lecturers.Where(p => p.LecturerId == LecturerId).AsEnumerable();
+            context.Lecturers.RemoveRange(DelLecturer);
+            context.SaveChanges();
+
+            return AllLecturers();
         }
 
         #endregion
