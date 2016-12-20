@@ -164,14 +164,19 @@ namespace CollegeApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                context.Students.Add(new Student
+                Student saveStudent = new Student
                 {
                     StudentId = studentVM.StudentId,
                     Name = studentVM.StudentName,
                     DeptSectionId = studentVM.DeptSectionId,
                     DateofGraduaton = (studentVM.DateofGraduaton == null || (DateTime)studentVM.DateofGraduaton == DateTime.MinValue) ? null : studentVM.DateofGraduaton,
                     DateOfJoin = (studentVM.DateOfJoin == null || (DateTime)studentVM.DateOfJoin == DateTime.MinValue) ? null : studentVM.DateOfJoin
-                });
+                };
+                if (studentVM.StudentId > 0)
+                    context.Entry(saveStudent).State = System.Data.Entity.EntityState.Modified;
+                else
+                    context.Students.Add(saveStudent);
+
                 context.SaveChanges();
             }
             return AllStudents();
@@ -195,6 +200,38 @@ namespace CollegeApp.Controllers
                                 DateOfJoin = p.DateOfJoin
                             }).ToList();
             return Json(Students, JsonRequestBehavior.AllowGet);
+        }
+
+
+        [HttpGet]
+        public JsonResult EditStudent(int StudentId)
+        {
+            var editStudent = (from p in context.Students
+                               join q in context.DeptSections on p.DeptSectionId equals q.DeptSectionId
+                               join r in context.Departments on q.DepartmentId equals r.DepartmentId
+                               where p.StudentId == StudentId
+                               select new StudentViewModel
+                               {
+                                   StudentId = p.StudentId,
+                                   StudentName = p.Name,
+                                   DepartmentId = q.DepartmentId,
+                                   DepartmentName = r.Name,
+                                   DeptSectionId = p.DeptSectionId,
+                                   SectionName = q.Name,
+                                   DateofGraduaton = p.DateofGraduaton,
+                                   DateOfJoin = p.DateOfJoin
+                               }).First();
+            return Json(editStudent, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult DeleteStudent(int StudentId)
+        {
+            var DelStudent = context.Students.Where(p => p.StudentId == StudentId).AsEnumerable();
+            context.Students.RemoveRange(DelStudent);
+            context.SaveChanges();
+
+            return AllStudents();
         }
 
         #endregion

@@ -58,6 +58,7 @@
                     <th>
                         Graduation Date
                     </th>
+                    <th>Edit/Delete</th>
                 </tr>
             </thead>
             <tbody>
@@ -68,7 +69,11 @@
                     <td>{{student.SectionName}}</td>
                     <td><span ng-hide="{{student.DateOfJoin==='/Date(-62135596800000)/'}}">{{student.DateOfJoin.replace("/Date(", "").replace(")/","") | date : "dd-MMM-yyyy"}}</span><span ng-show="{{student.DateOfJoin==='/Date(-62135596800000)/'}}">--</span></td>
                     <td><span ng-hide="{{student.DateofGraduaton==='/Date(-62135596800000)/'}}">{{student.DateofGraduaton.replace("/Date(", "").replace(")/","") | date : "dd-MMM-yyyy"}}</span><span ng-show="{{student.DateofGraduaton==='/Date(-62135596800000)/'}}">--</span></td>
-                </tr>
+               <td>
+                   <a href="#" ng-click="EditStudent(student.StudentId)">Edit</a>
+                   <a href="#" ng-click="DeleteStudent(student.StudentId)">Delete</a>
+               </td>
+                 </tr>
             </tbody>
         </table>
     </div>
