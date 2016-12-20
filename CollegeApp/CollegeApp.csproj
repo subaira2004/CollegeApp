@@ -159,6 +159,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\angularjs-datetime-picker.css" />
     <Content Include="Content\bootstrap-slate.css" />
     <Content Include="Content\bootstrap-slate.min.css" />
     <Content Include="Content\bootstrap-yeti.css" />
@@ -197,6 +198,8 @@
     <Content Include="Scripts\angular-touch.min.js" />
     <Content Include="Scripts\angular.js" />
     <Content Include="Scripts\angular.min.js" />
+    <Content Include="Scripts\angularjs-datetime-picker.js" />
+    <Content Include="Scripts\angularjs-datetime-picker.min.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\errors.json" />

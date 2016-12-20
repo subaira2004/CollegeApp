@@ -7,6 +7,7 @@
     <title>@ViewBag.Title - College App</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    @Styles.Render("~/Content/angularDateTimePickerCSS")
 </head>
 <body style="min-height: 100vh;height: auto;">
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -42,7 +43,7 @@
             </ul>
         </div>
         <div class="col-xs-9">
-           
+
             <div class="row" ng-view>
                 @RenderBody()
             </div>
@@ -58,7 +59,7 @@
     @Scripts.Render("~/bundles/angularjs")
     @RenderSection("scripts", required: false)
     <script>
-        var myApp = angular.module('myApp', ["ngRoute"]).config(function ($routeProvider, $httpProvider, $locationProvider) {
+        var myApp = angular.module('myApp', ["ngRoute","angularjs-datetime-picker"]).config(function ($routeProvider, $httpProvider, $locationProvider) {
 
             $locationProvider.hashPrefix('!').html5Mode(true);
 
@@ -249,6 +250,7 @@
             $scope.selectedDepartment = {};
             $scope.selecteSection = {};
 
+            //get all student in to grid view
             $http({
                 method: 'GET',
                 url: '/CollegeAppMaster/AllStudents'
@@ -263,6 +265,72 @@
                 alert(response.data.Error);
                 $scope.dataLoaded = true;
             });
+
+            $http({
+                method: 'GET',
+                url: '/CollegeAppMaster/AllDepartments'
+            }).then(function successCallback(response) {
+                // this callback will be called asynchronously
+                // when the response is available
+                $scope.departments = response.data;
+                $scope.dataLoaded = true;
+            }, function errorCallback(response) {
+                // called asynchronously if an error occurs
+                // or server returns response with an error status.
+                alert(response.data.Error);
+                $scope.dataLoaded = true;
+            });
+
+            $scope.getDeptSection = function () {
+                $scope.sections = [];
+                $scope.selecteSection = {};
+                if ($scope.selectedDepartment.DepartmentId) {
+                    $scope.dataLoaded = false;
+                    $http({
+                        method: 'GET',
+                        url: '/CollegeAppMaster/GetDeptSectionByDeptId?DepartmentId=' + $scope.selectedDepartment.DepartmentId
+                    }).then(function successCallback(response) {
+                        // this callback will be called asynchronously
+                        // when the response is available
+                        $scope.sections = response.data;
+                        $scope.dataLoaded = true;
+                    }, function errorCallback(response) {
+                        // called asynchronously if an error occurs
+                        // or server returns response with an error status.
+                        alert(response.data.Error);
+                        $scope.dataLoaded = true;
+                    });
+                }
+            }
+
+            $scope.submit = function () {
+                $scope.dataLoaded = false;
+                $scope.student.DeptSectionId = $scope.selectedSection.DeptSectionId
+                var pattern = /(\d{2})-(\d{3})-(\d{4})/;
+                var DateOfJoin = $scope.student.DateOfJoin ? new Date($scope.student.DateOfJoin.replace(pattern, '$3-$2-$1')) : null;
+                var DateOfGraduation = $scope.student.DateOfGraduation ? new Date($scope.student.DateOfGraduation.replace(pattern, '$3-$2-$1')) : null;
+                $scope.student.DateOfJoin = DateOfJoin;// new Date($scope.student.DateOfJoin).toLocaleDateString("en-GB");
+                $scope.student.DateOfGraduation = DateOfGraduation;//new Date($scope.student.DateOfGraduation).toLocaleDateString("en-GB");
+                $http({
+                    method: 'POST',
+                    url: '/CollegeAppMaster/Student',
+                    data: $scope.student
+                }).then(function successCallback(response) {
+                    // this callback will be called asynchronously
+                    // when the response is available
+                    $scope.students = response.data;
+                    $scope.student = {};
+                    $scope.selectedDepartment = {};
+                    $scope.selectedSection = {};
+                    $scope.sections = [];
+                    $scope.dataLoaded = true;
+                }, function errorCallback(response) {
+                    // called asynchronously if an error occurs
+                    // or server returns response with an error status.
+                    alert(response.data.Error);
+                    $scope.dataLoaded = true;
+                });
+            };
 
         }]);
 

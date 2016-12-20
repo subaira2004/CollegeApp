@@ -26,9 +26,12 @@ namespace CollegeApp
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap-slate.css",
                       "~/Content/site.css"));
+            bundles.Add(new StyleBundle("~/Content/angularDateTimePickerCSS").Include(
+                      "~/Content/angularjs-datetime-picker.css"));
             bundles.Add(new ScriptBundle("~/bundles/angularjs").Include(
                 "~/Scripts/angular.js",
-                "~/Scripts/angular-route.js"
+                "~/Scripts/angular-route.js",
+                "~/Scripts/angularjs-datetime-picker.js"
                 ));
         }
     }

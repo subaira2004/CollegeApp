@@ -16,7 +16,7 @@ namespace CollegeApp.Models
         public string SectionName { get; set; }
         [Required]
         public string StudentName { get; set; }
-        public DateTime DateOfJoin { get; set; }
-        public DateTime DateofGraduaton { get; set; }
+        public Nullable<DateTime> DateOfJoin { get; set; }
+        public Nullable<DateTime> DateofGraduaton { get; set; }
     }
 }
