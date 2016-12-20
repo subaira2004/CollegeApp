@@ -60,7 +60,7 @@
     @RenderSection("scripts", required: false)
 
     <script>
-        var myApp = angular.module('myApp', ["ngRoute","angularjs-datetime-picker"]).config(function ($routeProvider, $httpProvider, $locationProvider) {
+        var myApp = angular.module('myApp', ["ngRoute", "angularjs-datetime-picker"]).config(function ($routeProvider, $httpProvider, $locationProvider) {
 
             $locationProvider.hashPrefix('!').html5Mode(true);
 
@@ -241,8 +241,7 @@
             });
 
             //to edit/update Lecturer
-            $scope.EditSection = function(SectionId)
-            {
+            $scope.EditSection = function (SectionId) {
                 $scope.dataLoaded = false;
                 $scope.section = {};
                 $scope.selectedDepartment = {};
@@ -288,7 +287,7 @@
 
 
         //Student Controller
-        myApp.controller("StudentController", ["$http", "$scope", "$routeParams", function ($http, $scope, $routeParams) {
+        myApp.controller("StudentController", ["$http", "$scope", "$routeParams", "$filter", function ($http, $scope, $routeParams, $filter) {
             $scope.dataLoaded = false;
             $scope.search = '';
             $scope.students = [];
@@ -296,7 +295,7 @@
             $scope.sections = [];
             $scope.departments = [];
             $scope.selectedDepartment = {};
-            $scope.selecteSection = {};
+            $scope.selectedSection = {};
 
             //get all student in to grid view
             $http({
@@ -314,6 +313,7 @@
                 $scope.dataLoaded = true;
             });
 
+            //getting all dept for Dropdown
             $http({
                 method: 'GET',
                 url: '/CollegeAppMaster/AllDepartments'
@@ -329,9 +329,10 @@
                 $scope.dataLoaded = true;
             });
 
+            //Getting sections for dropdown as per selected Dept
             $scope.getDeptSection = function () {
                 $scope.sections = [];
-                $scope.selecteSection = {};
+                $scope.selectedSection = {};
                 if ($scope.selectedDepartment.DepartmentId) {
                     $scope.dataLoaded = false;
                     $http({
@@ -341,6 +342,9 @@
                         // this callback will be called asynchronously
                         // when the response is available
                         $scope.sections = response.data;
+                        //while editing we need to set below in order to show in dropdown as selected
+                        $scope.selectedSection.DeptSectionId = $scope.student.DeptSectionId;
+                        $scope.selectedSection.Name = $scope.student.SectionName;
                         $scope.dataLoaded = true;
                     }, function errorCallback(response) {
                         // called asynchronously if an error occurs
@@ -351,6 +355,7 @@
                 }
             }
 
+            //To Save Student
             $scope.submit = function () {
                 $scope.dataLoaded = false;
                 $scope.student.DeptSectionId = $scope.selectedSection.DeptSectionId
@@ -359,6 +364,7 @@
                 var DateOfGraduation = $scope.student.DateOfGraduation ? new Date($scope.student.DateOfGraduation.replace(pattern, '$3-$2-$1')) : null;
                 $scope.student.DateOfJoin = DateOfJoin;// new Date($scope.student.DateOfJoin).toLocaleDateString("en-GB");
                 $scope.student.DateOfGraduation = DateOfGraduation;//new Date($scope.student.DateOfGraduation).toLocaleDateString("en-GB");
+
                 $http({
                     method: 'POST',
                     url: '/CollegeAppMaster/Student',
@@ -379,6 +385,60 @@
                     $scope.dataLoaded = true;
                 });
             };
+
+            //To Edit / Update Student
+            $scope.EditStudent = function (StudentId) {
+                $scope.dataLoaded = false;
+                $scope.student = {};
+                $scope.sections = [];
+                $scope.selectedDepartment = {};
+                $scope.selectedSection = {};
+
+                $http({
+                    method: 'GET',
+                    url: '/CollegeAppMaster/EditStudent?StudentId=' + StudentId
+                }).then(function successCallback(response) {
+                    // this callback will be called asynchronously
+                    // when the response is available
+                    $scope.student = response.data;
+                    if ($scope.student.DateOfJoin) {
+                        $scope.student.DateOfJoin = $filter('date')(new Date(parseInt($scope.student.DateOfJoin.replace("/Date(", "").replace(")/", ""))), "dd-MMM-yyyy");
+                    }
+                    if ($scope.student.DateofGraduaton) {
+                        $scope.student.DateofGraduaton = $filter('date')(new Date(parseInt($scope.student.DateofGraduaton.replace("/Date(", "").replace(")/", ""))), "dd-MMM-yyyy");
+                    }
+                    $scope.selectedDepartment.DepartmentId = response.data.DepartmentId;
+                    $scope.selectedDepartment.DepartmentName = response.data.DepartmentName;
+                    $scope.getDeptSection();
+                    $scope.dataLoaded = true;
+                }, function errorCallback(response) {
+                    // called asynchronously if an error occurs
+                    // or server returns response with an error status.
+                    alert(response.data.Error);
+                    $scope.dataLoaded = true;
+                });
+            };
+
+            //To delete the Student
+            $scope.DeleteStudent = function (StudentId) {
+                if (confirm('Are you sure want delete this Student?')) {
+                    $scope.dataLoaded = false;
+                    $http({
+                        method: 'GET',
+                        url: '/CollegeAppMaster/DeleteStudent?StudentId=' + StudentId
+                    }).then(function successCallback(response) {
+                        // this callback will be called asynchronously
+                        // when the response is available
+                        $scope.students = response.data;
+                        $scope.dataLoaded = true;
+                    }, function errorCallback(response) {
+                        // called asynchronously if an error occurs
+                        // or server returns response with an error status.
+                        alert(response.data.Error);
+                        $scope.dataLoaded = true;
+                    });
+                }
+            }
 
         }]);
 
